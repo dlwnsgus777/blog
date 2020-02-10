@@ -15,7 +15,7 @@ FIFO란 먼저 들어온 Data가 먼저 나가게 되는 방식입니다.
  큐는 프린터의 출력, 프로세스 관리 등 입력된 시간 순서대로 처리해야 할 필요가 있는 상황에 이용됩니다.
 
  
-<img src="images/queue.png" width="300">
+<img src="images/queue.png" width="500">
 
 ### 큐의 주요 동작 기능
 
