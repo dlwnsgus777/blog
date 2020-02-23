@@ -1,4 +1,4 @@
-### 프로젝트 DB연동하기
+### JPA Test 코드 작성
 
 #### [기억보단 기록을](https://jojoldu.tistory.com/284?category=689637) 블로그를 참고하여 만들었습니다.
 
@@ -22,39 +22,40 @@ DB연결을 하기전에 JPA 코드를 먼저 작성해보겠습니다.
 
 ![프로젝트 구조](images/addpostpackage.png)
 
-webservice > domain > posts 패키지를 생성하고,
+webservice > domain > users 패키지를 생성하고,
 
-- **Posts** 클래스
-- **PostsRepository** 인터페이스
+- **Users** 클래스
+- **UsersRepository** 인터페이스
 
 를 작성합니다.
 
-#### Posts Class
+#### Users Class
 
 ```java
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-public class Posts {
+public class Users {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(length = 500, nullable = false)
-	private String title;
+	@Column(length = 20,unique = true, nullable = false)
+	private String userId;
 
-	@Column(columnDefinition = "TEXT", nullable = false)
-	private String content;
+	@Column(length = 50,unique = true, nullable = false)
+	private String password;
 
-	private String author;
+	private String userName;
 
 	@Builder
-	public Posts(String title, String content, String author) {
-		this.title = title;
-		this.content = content;
-		this.author = author;
+	public Users(String userId, String password, String userName) {
+		this.userId = userId;
+		this.password = password;
+		this.userName = userName;
 	}
+
 }
 
 ```
@@ -63,10 +64,10 @@ public class Posts {
 
 - [이클립스에서 설치](http://countryxide.tistory.com/16)
 
-#### PostsRepository Interface
+#### UsersRepository Interface
 
 ```java
-public interface PostsRepository extends JpaRepository<Posts, Long>{
+public interface UsersRepository extends JpaRepository<Users, Long> {
 
 }
 
