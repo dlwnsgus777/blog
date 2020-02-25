@@ -53,9 +53,9 @@ thymeleaf:
 
 **applications.yml** 에 다음과 같이 설정을 추가하겠습니다.
 
-cache값에 __false__ 를 두면 수정내용을 프로젝트 재시작없이 확인할 수 있습니다.
+cache값에 **false** 를 두면 수정내용을 프로젝트 재시작없이 확인할 수 있습니다.
 
-추후 배포를 할때는 __true__ 값으로 변경해야합니다.
+추후 배포를 할때는 **true** 값으로 변경해야합니다.
 
 ![add index](images/addindex.png)
 
@@ -78,55 +78,70 @@ cache값에 __false__ 를 두면 수정내용을 프로젝트 재시작없이 �
 
 이제 Controller를 작성하겠습니다.
 
-#### Users Class
+![add webcon](images/addwebcon.png)
+
+위의 사진처럼 web 패키지에 WebController 클래스를 생성합니다.
+
+#### WebController Class
 
 ```java
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-@Entity
-public class Users {
+@Controller
+@AllArgsConstructor
+public class WebController {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	@Column(length = 20,unique = true, nullable = false)
-	private String userId;
-
-	@Column(length = 50,unique = true, nullable = false)
-	private String password;
-
-	private String userName;
-
-	@Builder
-	public Users(String userId, String password, String userName) {
-		this.userId = userId;
-		this.password = password;
-		this.userName = userName;
+	@GetMapping("/")
+	public String init() {
+		return "index";
 	}
 
 }
 
 ```
 
-- 해당 코드를 작성해서 실행하시기전에 IDE 별로 LOMBOK을 설치하셔야합니다.
+`@Controller` 를 사용하면 View(화면)을 반환하게 됩니다.
 
-- [이클립스에서 설치](http://countryxide.tistory.com/16)
+여기서는 **resource/templates/index.html** 을 반환합니다.
 
-#### UsersRepository Interface
+이제 Test 코드를 작성하여 확인해보겠습니다.
+
+![add webtest](images/addwebtest.png)
+
+위의 사진과 같이 webservice / web 패키지를 만들고
+
+WebControllerTest 클래스를 생성합니다.
+
+#### WebControllerTest class
 
 ```java
-public interface UsersRepository extends JpaRepository<Users, Long> {
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class WebControllerTest {
 
+	@Autowired
+	private TestRestTemplate testRestTemplate;
+
+	@Test
+	public void 메인페이지() {
+		//when
+		String body = this.testRestTemplate.getForObject("/", String.class);
+
+		//then
+		assertThat(body).contains("테스트해보자");
+
+	}
 }
 
 ```
 
-이제 Test 코드를 작성해보겠습니다.
+반환하는 페이지에 `테스트해보자` 라는 text가 있는지 확인하는 코드입니다.
 
-![테스트코드 패키지](images/testpackage.png)
+![webcon 테스트코드 통과](images/passtestwebcon.png)
 
-프로젝트의 test 폴더에 다음과 같이 패키지와 class를 작성합니다.
+테스트 코드가 통과되었으니 실제로 화면이 잘 뜨는지 확인합니다.
+
+![webcon main](images/mainpage.png)
+
+실제 화면이 잘 출력되니 간단하게 로그인화면을 구현하겠습니다.
 
 현재 저는 **Junit 5** 버전을 사용하기때문에 다음과 같이 작성했습니다.
 
