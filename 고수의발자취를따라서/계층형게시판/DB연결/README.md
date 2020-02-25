@@ -164,7 +164,7 @@ Controller도 다음과 같이 추가하겠습니다.
 ```java
 @RestController
 @AllArgsConstructor
-public class WebController {
+public class WebRestController {
 
 	private UsersRepository userRepository;
 

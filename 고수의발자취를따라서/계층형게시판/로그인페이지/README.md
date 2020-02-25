@@ -14,6 +14,8 @@
 
 #### 6. 게시판 기능 구현
 
+---
+
 DB 연결을 완료하였으니 이제 로그인 페이지를 만들겠습니다.
 
 원래는 JSP를 사용하려고 했지만 스프링부트에서는 여러가지 [제약조건](https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/htmlsingle/#boot-features-jsp-limitations)이 있고, 권장하지는 않았습니다.
@@ -51,9 +53,9 @@ thymeleaf:
 
 **applications.yml** 에 다음과 같이 설정을 추가하겠습니다.
 
-cache값에 false를 두면 수정내용을 프로젝트 재시작없이 확인할 수 있습니다.
+cache값에 __false__ 를 두면 수정내용을 프로젝트 재시작없이 확인할 수 있습니다.
 
-추후 배포를 할때는 true 값으로 변경해야합니다.
+추후 배포를 할때는 __true__ 값으로 변경해야합니다.
 
 ![add index](images/addindex.png)
 

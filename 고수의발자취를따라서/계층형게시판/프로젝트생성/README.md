@@ -54,14 +54,16 @@ next 버튼을 클릭하면 위와 같은 화면이 됩니다.
 
 처음 프로젝트를 만들고 나면 **HierarchicalBoardApplication.java** 가 생성될텐데 이를 **Application.java** 로 이름을 변경하겠습니다.
 
-그리고 **com.board.webservice** 패키지 안에 web이라는 패키지를 만들고 **WebController.java** 를 생성합니다.
+그리고 **com.board.webservice** 패키지 안에 web이라는 패키지를 만들고 **WebRestController.java** 를 생성합니다.
 
 ![프로젝트 나누기](images/프로젝트파일나누기.png)
 
-**WebController.java** 파일에 아래와 같이 작성합니다.
+### WebController.java가 아닌 WebRestController.java입니다. 
+
+**WebRestController.java** 파일에 아래와 같이 작성합니다.
 
 ```java
-// WebController.java
+// WebRestController.java
 
 package com.board.webserivce.web;
 
@@ -69,7 +71,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class WebController {
+public class WebRestController {
 
 	@GetMapping("/")
 	public String init() {
