@@ -19,11 +19,32 @@
 ---
 아무래도 로그인 / 로그아웃의 기능에 대해서 생각해야 할 것들이 많습니다.
 
-로그인 기능은 Spring Security 를 이용해서 구현하도록 하겠습니다.
+대표적으로 
 
+* 접근 주체(Principal) : 보호된 대상에 접근하는 유저
 
+* 인증 (Authenticate) : 현재 유저가 누구인지 확인 (로그인)
 
-원래는 JSP를 사용하려고 했지만 스프링부트에서는 여러가지 [제약조건](https://docs.spring.io/spring-boot/docs/2.1.5.RELEASE/reference/htmlsingle/#boot-features-jsp-limitations)이 있고, 권장하지는 않았습니다.
+* 인가 (Authorize) : 현재 유저가 어떤 서비스에 접근할 수 있는지에 대한 권한 검사
+
+* 권한 : 애플리케이션의 동작을 수행할 수 있도록 허락되어있는지를 결정
+
+간단한 예로  **사용자** 라는 **권한** 을 가진 유저는 **관리자 권한**을 가진 사람이 접근할 수 있는 서비스에는 접근을 하지 못하게 하는 것 입니다.
+
+이밖에도 생각할 것들이 더 많습니다... 
+
+간단하게 로그인 / 로그아웃 기능을 구현하려해도
+배보다 배꼽이 더 커지는 경우가 발생한다고하여
+
+ 로그인 / 로그아웃 기능은 **Spring Security**를 사용해 구현하기로 결정했습니다.
+
+* **Spring Security(스프링 시큐리티)**  
+	* 스프링 시큐리티란 스프링 기반의 애플리케이션의 보안을 담당하는 프레임워크입니다. 
+
+	* [공식문서](https://docs.spring.io/spring-security/site/docs/4.2.7.RELEASE/reference/htmlsingle/#getting-started)
+
+### Spring Security 적용
+---
 
 찾아보니 JSP, Freemarker, Velocity는 몇 년간 업데이트가 되지않고 있다고도 합니다.
 
