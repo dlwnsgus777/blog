@@ -14,55 +14,62 @@
 
 #### 6. 게시판 기능 구현
 
-
 ### Spring Security(스프링 시큐리티)
+
 ---
+
 아무래도 로그인 / 로그아웃의 기능에 대해서 생각해야 할 것들이 많습니다.
 
-대표적으로 
+대표적으로
 
-* 접근 주체(Principal) : 보호된 대상에 접근하는 유저
+- 접근 주체(Principal) : 보호된 대상에 접근하는 유저
 
-* 인증 (Authenticate) : 현재 유저가 누구인지 확인 (로그인)
+- 인증 (Authenticate) : 현재 유저가 누구인지 확인 (로그인)
 
-* 인가 (Authorize) : 현재 유저가 어떤 서비스에 접근할 수 있는지에 대한 권한 검사
+- 인가 (Authorize) : 현재 유저가 어떤 서비스에 접근할 수 있는지에 대한 권한 검사
 
-* 권한 : 애플리케이션의 동작을 수행할 수 있도록 허락되어있는지를 결정
+- 권한 : 애플리케이션의 동작을 수행할 수 있도록 허락되어있는지를 결정
 
-간단한 예로  **사용자** 라는 **권한** 을 가진 유저는 **관리자 권한**을 가진 사람이 접근할 수 있는 서비스에는 접근을 하지 못하게 하는 것 입니다.
+간단한 예로 **사용자** 라는 **권한** 을 가진 유저는 **관리자 권한**을 가진 사람이 접근할 수 있는 서비스에는 접근을 하지 못하게 하는 것 입니다.
 
-이밖에도 생각할 것들이 더 많습니다... 
+이밖에도 생각할 것들이 더 많습니다...
 
 간단하게 로그인 / 로그아웃 기능을 구현하려해도
 배보다 배꼽이 더 커지는 경우가 발생한다고하여
 
- 로그인 / 로그아웃 기능은 **Spring Security**를 사용해 구현하기로 결정했습니다.
+로그인 / 로그아웃 기능은 **Spring Security**를 사용해 구현하기로 결정했습니다.
 
-* **Spring Security(스프링 시큐리티)**  
-	* 스프링 시큐리티란 스프링 기반의 애플리케이션의 보안을 담당하는 프레임워크입니다. 
+- **Spring Security(스프링 시큐리티)**  
+   \* 스프링 시큐리티란 스프링 기반의 애플리케이션의 보안을 담당하는 프레임워크입니다.
 
-	* [공식문서](https://docs.spring.io/spring-security/site/docs/4.2.7.RELEASE/reference/htmlsingle/#getting-started)
+      	* [공식문서](https://docs.spring.io/spring-security/site/docs/4.2.7.RELEASE/reference/htmlsingle/#getting-started)
 
 ### Spring Security 적용
+
 ---
 
-찾아보니 JSP, Freemarker, Velocity는 몇 년간 업데이트가 되지않고 있다고도 합니다.
-
-스프링부트에서는 Thymeleaf(타임리프)라는 템플릿 엔진을 권장합니다.
-
-Handlebar라는 템플릿과 Thymeleaf 둘 중에 고민을 하던 중
-
-- 스프링에서 밀어주고 있기 때문에 view 설정을 따로하지 않아도 되는 점
-
-- html 문법을 사용하기 때문에 좀 더 익숙하다는 점
-
-- 문법이 생각보다 쉬워보였던 점 (제가 느끼기에....ㅎ)
-
-이러한 이유로 Thymeleaf를 사용하기로 결정했습니다.
-
-#### 프로젝트에 Thymeleaf 연결
+Spring Security 디펜던시를 추가하겠습니다.
 
 #### build.gradle
+
+```java
+// 스프링 시큐리티
+implementation 'org.springframework.boot:spring-boot-starter-security'
+// thtmeleaf에서 스프링 시큐리티를 사용하기위한 디펜던시
+implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+```
+
+스프링 시큐리티를 사용하기위해 설정을 추가하겠습니다.
+
+![config](images/configpack.png)
+
+webservice 패키지 아래에 config 패키지를 만들고
+
+SecurityConfig 클래스를 생성합니다.
+
+#### SecurityConfig
+
+Optional 은 java 8 에서 처음 도입이 되었으며 java 에서 값이 없음을 표현하기 위한 null 값을 그대로 사용하지 않고 Optional 인스턴스로 대체하여 값이 없음에 대한 예기치 못한 에러 발생으로 부터 안전한 값의 처리를 지원한다는 점이 특징이라고 할 수 있습니다.
 
 ```java
 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -170,7 +177,9 @@ public class WebControllerTest {
 실제 화면이 잘 출력되니 간단하게 로그인화면을 구현하겠습니다.
 
 ### Thymeleaf Layout
+
 ---
+
 Thymeleaf Layout을 이용해 html에서 공통적인 부분들을 나누겠습니다.
 
 Thymeleaf에서 Layout 기능을 사용하려면 **build.gradle** 파일에 디펜던시를 추가해야합니다.
@@ -191,37 +200,39 @@ Thymeleaf Layout에 대한 자세한 설명은 따로 [여기서](https://blog.j
 
 ```html
 <!DOCTYPE html>
-<html lang="ko"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>고수의 발자취를 따라서</title>
     <!-- 부트스트랩 -->
-   <link rel="stylesheet" href="/css/lib/bootstrap.min.css">
-   
-</head>
-<body>
-	<header>
-		<h2>테스트 레이아웃</h2>
-	</header>
-	<nav>
-		<a href="/">main</a>
-		<a href="/hello">hello</a>
-	</nav>
-	<section layout:fragment="content"></section>
-	<footer>
-		<p>개발인생</p>
-	</footer>
-	<!-- Jquery, bootstrap -->
+    <link rel="stylesheet" href="/css/lib/bootstrap.min.css" />
+  </head>
+  <body>
+    <header>
+      <h2>테스트 레이아웃</h2>
+    </header>
+    <nav>
+      <a href="/">main</a>
+      <a href="/hello">hello</a>
+    </nav>
+    <section layout:fragment="content"></section>
+    <footer>
+      <p>개발인생</p>
+    </footer>
+    <!-- Jquery, bootstrap -->
     <script src="/js/lib/jquery.min.js"></script>
     <script src="/js/lib/bootstrap.min.js"></script>
-</body>
+  </body>
 </html>
 ```
+
 이제 페이지에서 Content가 되는 부분을 작성해보겠습니다.
 
 ![addhell](images/addhell.png)
@@ -232,29 +243,34 @@ Thymeleaf Layout에 대한 자세한 설명은 따로 [여기서](https://blog.j
 
 ```html
 <!DOCTYPE html>
-<html lang="ko"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{cmmn/layout}">
-	
-<section layout:fragment="content">
-	<h1>테스트해보자</h1>
-</section>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{cmmn/layout}"
+>
+  <section layout:fragment="content">
+    <h1>테스트해보자</h1>
+  </section>
+</html>
 ```
 
 ### hello.html
+
 ```html
 <!DOCTYPE html>
-<html lang="ko"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{cmmn/layout}">
-	
-<section layout:fragment="content">
-	<h1>Hello</h1>
-</section>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{cmmn/layout}"
+>
+  <section layout:fragment="content">
+    <h1>Hello</h1>
+  </section>
+</html>
 ```
 
 이제 **hello.html** 을 불러올 수 있게 **Webcontroller** 클래스를 수정합니다.
@@ -263,12 +279,12 @@ Thymeleaf Layout에 대한 자세한 설명은 따로 [여기서](https://blog.j
 @Controller
 @AllArgsConstructor
 public class WebController {
-	
+
 	@GetMapping("/")
 	public String init() {
 		return "contents/index";
 	}
-	
+
 	@GetMapping("/hello")
 	public String hello() {
 		return "contents/hello";
@@ -280,12 +296,11 @@ public class WebController {
 이제 프로젝트를 실행해서 레이아웃이 잘 동작하는지 확인하겠습니다.
 
 #### main 클릭시
+
 ![main](images/clickmain.png)
 
 #### hello 클릭시
+
 ![hello](images/clickhello.png)
 
 공통으로 지정한 부분을 제외하고 화면이 변하는 걸 확인할 수 있습니다.
-
-
-
