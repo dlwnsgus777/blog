@@ -61,6 +61,9 @@ implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 
 스프링 시큐리티를 사용하기위해 설정을 추가하겠습니다.
 
+#### 이번 프로젝트에서는 정말 기본적인 설정만으로 구현하겠습니다.
+
+
 ![config](images/configpack.png)
 
 webservice 패키지 아래에 config 패키지를 만들고
@@ -68,6 +71,10 @@ webservice 패키지 아래에 config 패키지를 만들고
 SecurityConfig 클래스를 생성합니다.
 
 #### SecurityConfig
+
+```java
+
+```
 
 Optional 은 java 8 에서 처음 도입이 되었으며 java 에서 값이 없음을 표현하기 위한 null 값을 그대로 사용하지 않고 Optional 인스턴스로 대체하여 값이 없음에 대한 예기치 못한 에러 발생으로 부터 안전한 값의 처리를 지원한다는 점이 특징이라고 할 수 있습니다.
 
