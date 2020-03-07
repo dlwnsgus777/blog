@@ -63,7 +63,6 @@ implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 
 #### 이번 프로젝트에서는 정말 기본적인 설정만으로 구현하겠습니다.
 
-
 ![config](images/configpack.png)
 
 webservice 패키지 아래에 config 패키지를 만들고
@@ -73,8 +72,131 @@ SecurityConfig 클래스를 생성합니다.
 #### SecurityConfig
 
 ```java
+@Configuration
+@EnableWebSecurity
+@AllArgsConstructor
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	private UserSecurityService userSecurityService;
 
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		// static 폴더 하위 목록은 인증 무시하기
+		web.ignoring().antMatchers("/css/**", "/js/**", "/img/**");
+	}
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		// 페이지 접근 권한에 대한 설정
+		http.authorizeRequests()
+			.antMatchers("/board").hasRole("USER")
+			.antMatchers("/**").permitAll()
+		.and()	// 로그인 설정
+			.formLogin()
+			.loginPage("/")
+			.loginProcessingUrl("/user/login")
+			.defaultSuccessUrl("/board", true)
+			.failureHandler(loginFailHandler())
+			.permitAll()
+		.and()	// 로그아웃 설정
+			.logout()
+			.logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
+			.logoutSuccessUrl("/")
+			.invalidateHttpSession(true)
+		.and() // 403 예외처리 설정
+			.exceptionHandling().accessDeniedPage("/login/error");
+	}
+
+	@Override
+	public void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userSecurityService).passwordEncoder(passwordEncoder());
+	}
+
+  @Bean
+	public AuthenticationFailureHandler loginFailHandler() {
+		return new LoginFailHandler();
+	}
+}
 ```
+
+스프링 시큐리티의 설정 클래스입니다.
+
+`@EnableWebSecurity` 어노테이션을 붙여서
+스프링 시큐리티의 설정을 정의할 수 있습니다.
+
+`WebSecurityConfigurerAdapter` 클래스를 상속받아 시큐리티의 설정을 진행합니다.
+
+```java
+@Bean
+public PasswordEncoder passwordEncoder() {	  return new BCryptPasswordEncoder();
+}
+```
+
+스프링 시큐리티에서 제공하는 암호화 객체입니다.
+서비스에서 사용할 수 있도록 Bean으로 등록합니다.
+
+```java
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		// static 폴더 하위 목록은 인증 무시하기
+		web.ignoring().antMatchers("/css/**", "/js/**", "/img/**");
+	}
+```
+
+configure 메서드를 오버라이딩하여 시큐리티의 설정을 진행합니다.
+
+매개변수로 `WebSecurity`를 전달해고 위의 코드처럼 작성하면  
+ `antMatchers()` 의 전달인자로 전해주는 경로의 파일들은 스프링 시큐리티가 무시할 수 있도록 설정이 됩니다.
+
+```java
+	@Override
+protected void configure(HttpSecurity http) throws Exception {
+	// 페이지 접근 권한에 대한 설정
+	http.authorizeRequests()
+		.antMatchers("/board").hasRole("USER")
+		.antMatchers("/**").permitAll()
+	.and()	// 로그인 설정
+		.formLogin()
+		.loginPage("/")
+		.loginProcessingUrl("/user/login")
+		.defaultSuccessUrl("/board", true)
+		.failureHandler(loginFailHandler())
+		.permitAll()
+	.and()	// 로그아웃 설정
+		.logout()
+		.logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
+		.logoutSuccessUrl("/")
+		.invalidateHttpSession(true)
+	.and() // 403 예외처리 설정
+		.exceptionHandling().accessDeniedPage("/login/error");
+}
+```
+
+`HttpSecurity` 를 전달인자로 전해주면
+
+**HTTP** 요청에 대한 보안 설정을 할 수 있습니다.
+
+```java
+	http.authorizeRequests()
+		.antMatchers("/board").hasRole("USER")
+		.antMatchers("/**").permitAll()
+```
+
+- `.antMatchers("/board").hasRole("USER")`
+
+  이 부분은 "/board"에 대한 요청 처리를 설정합니다.
+
+  요청을 보내는 대상의 **ROLE** 을 확인하여 **USER** 라는
+
+  **ROLE** 을 가지고 있는 대상만 해당 페이지로의 접근이 가능합니다.
+
+- `permitAll()`
+
+  모든 요청에 대해 접근할 수 있도록 해줍니다.
 
 Optional 은 java 8 에서 처음 도입이 되었으며 java 에서 값이 없음을 표현하기 위한 null 값을 그대로 사용하지 않고 Optional 인스턴스로 대체하여 값이 없음에 대한 예기치 못한 에러 발생으로 부터 안전한 값의 처리를 지원한다는 점이 특징이라고 할 수 있습니다.
 
