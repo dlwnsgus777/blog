@@ -37,10 +37,11 @@
 
 로그인 / 로그아웃 기능은 **Spring Security**를 사용해 구현하기로 결정했습니다.
 
-- **Spring Security(스프링 시큐리티)**  
-   \* 스프링 시큐리티란 스프링 기반의 애플리케이션의 보안을 담당하는 프레임워크입니다.
+- **Spring Security(스프링 시큐리티)**
 
-      	* [공식문서](https://docs.spring.io/spring-security/site/docs/4.2.7.RELEASE/reference/htmlsingle/#getting-started)
+  - 스프링 시큐리티란 스프링 기반의 애플리케이션의 보안을 담당하는 프레임워크입니다.
+
+  - [공식문서](https://docs.spring.io/spring-security/site/docs/4.2.7.RELEASE/reference/htmlsingle/#getting-started)
 
 ### Spring Security 적용
 
