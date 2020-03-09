@@ -776,63 +776,7 @@ form 태그를 사용하면 굳이 위의 태그를 삽입할 필요는 없지�
 			</div>
 		</div>
 	</div>
-</section>
-```
-
-- `<span th:text="${errorMsg}" style="color:red"></span>`
-
-  로그인 실패시 핸들러에서 전달해준 에러 매시지를 화면에 출력합니다.
-
-form 태그에서 주의할 점은 스프링 시큐리티에서 화면의 form 태그를 받아 로그인을 진행할 때
-
-**username**
-
-**password**
-
-라는 매개변수를 받아 진행하기때문에 이름이 바뀌지 않게 주의 하셔야합니다.
-
-따로 설정을 하셔서 매개변수의 이름을 바꿀 수 있습니다.
-
-**info.html**
-
-```html
-<!DOCTYPE html>
-<html
-  lang="ko"
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{cmmn/layout}"
->
-  <section layout:fragment="content">
-    <div class="container wrap__content">
-      <div class="row">
-        <div class="col-sm-6 col-md-8 col-md-offset-2">
-          <div class="thumbnail">
-            <div class="caption">
-              <h3><span sec:authentication="name"></span> 님 환영합니다.</h3>
-              <p>
-                <a href="#" class="btn btn-primary" role="button">Button</a>
-                <a href="#" class="btn btn-default" role="button">Button</a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-</html>
-```
-
-이제 JQuery를 이용해 화면에 이벤트를 넣겠습니다.
-
-![addjquery](images/addappja.png)
-
-사진처럼 main.js 파일을 추가합니다.
-
-**mina.js**
-
-```javascript
+  <script>
 let main = {
   init: function() {
     this.userSignup();
@@ -911,6 +855,107 @@ let main = {
 };
 
 main.init();
+</script>
+</section>
+```
+
+- `<span th:text="${errorMsg}" style="color:red"></span>`
+
+  로그인 실패시 핸들러에서 전달해준 에러 매시지를 화면에 출력합니다.
+
+form 태그에서 주의할 점은 스프링 시큐리티에서 화면의 form 태그를 받아 로그인을 진행할 때
+
+**username**
+
+**password**
+
+라는 매개변수를 받아 진행하기때문에 이름이 바뀌지 않게 주의 하셔야합니다.
+
+따로 설정을 하셔서 매개변수의 이름을 바꿀 수 있습니다.
+
+타임리프 layout을 나눠놨기때문에 불러올 페이지에 script를 삽입했습니다.
+
+```javascript
+<script>
+let main = {
+  init: function() {
+    this.userSignup();
+    this.userLogin();
+  },
+  csrf: {
+    token: $("meta[name='_csrf']").attr("content"),
+    header: $("meta[name='_csrf_header']").attr("content")
+  },
+  // 회원가입시 서버로 넘어가는 값 체크하기.
+  validationSingup: function(userObj) {
+    let userName = userObj.userName;
+    let userId = userObj.userId;
+    let passwd = userObj.password;
+    let checkSpc = /[~!#$%^&*()_+|<>?:{}]/; // @는 검사에서 제외
+    console.log(userName.trim());
+    if (!userName) {
+      alert("유저 이름을 다시 정해주세요");
+      return false;
+    }
+
+    if (!userId && checkSpc.test(userName)) {
+      alert("아이디를 다시 입력해주세요");
+      return false;
+    }
+
+    if (!passwd) {
+      alert("비밀번호를 입력해주세요");
+      return false;
+    }
+    return true;
+  },
+  userSignup: function() {
+    let $this = this;
+    let suerSignIn = document.querySelector("#btn-save");
+    suerSignIn.addEventListener("click", function() {
+      let user = {
+        userName: document.querySelector("#userName").value.trim(),
+        userId: document.querySelector("#userId").value.trim(),
+        password: document.querySelector("#initPassword").value.trim()
+      };
+
+      if ($this.validationSingup(user)) {
+        $.ajax({
+          type: "POST",
+          url: "/users/signup",
+          dataType: "json",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify(user),
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader($this.csrf.header, $this.csrf.token);
+          }
+        })
+          .done(function(result) {
+            if (result.msg === "save") {
+              alert("회원가입에 성공했습니다.");
+              location.reload();
+            } else {
+              alert("회원가입에 실패했습니다. 다시 가입해주세요");
+              location.reload();
+            }
+          })
+          .fail(function(error) {
+            console.log(error);
+          });
+      }
+    });
+  },
+  userLogin: function() {
+    let userSignIn = document.querySelector("#login-btn");
+
+    userSignIn.addEventListener("click", function() {
+      $("#login-frm").submit();
+    });
+  }
+};
+
+main.init();
+</script>
 ```
 
 원래는 순수 자바스크립트 만으로 진행하려했으니 Ajax 통신은
@@ -942,6 +987,37 @@ Jquery를 이용하는게 더 수월하기때문에 Jquery를 사용했습니다
 ```
 
 ajax 통신을 할때 csrf 토큰을 **beforeSend** 메서드에서 `setRequestHeader()` 매개변수로 주어야 합니다.
+
+**info.html**
+
+```html
+<!DOCTYPE html>
+<html
+  lang="ko"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{cmmn/layout}"
+>
+  <section layout:fragment="content">
+    <div class="container wrap__content">
+      <div class="row">
+        <div class="col-sm-6 col-md-8 col-md-offset-2">
+          <div class="thumbnail">
+            <div class="caption">
+              <h3><span sec:authentication="name"></span> 님 환영합니다.</h3>
+              <p>
+                <a href="#" class="btn btn-primary" role="button">Button</a>
+                <a href="#" class="btn btn-default" role="button">Button</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</html>
+```
 
 이제 기능이 잘 작동하는 화면을 통해 확인해보겠습니다.
 
