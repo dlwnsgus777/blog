@@ -20,6 +20,31 @@
 
 여기서는 회원 탈퇴, 유저 정보 변경을 진행하도록 하겠습니다.
 
+유저 정보 변경은 JPA의 **Dirty checking**을 이용해 구현하겠습니다.
+
+**Dirty checking**
+
+더티 체킹(Dirty checking) 이란 상태 변경 검사입니다.
+
+JPA에서는 트랜잭션이 끝나는 시점에
+
+**최초 조회 상태**와 비교해 변화가 있는 모든 엔티티 객체를 DB에 자동으로 반영해줍니다.
+
+JPA에서는 엔티티를 조회했을 때 조회 상태 그대로를 **스냅샷** 으로 만들어놓습니다.
+
+그리고 트랜잭션이 끝나는 시점에 이 스냅샷과 비교해 다른점이 있으면 Updata Query를 DB에 전달합니다.
+
+
+시큐리티 유저 정보 변경
+```
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		
+		Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), authorities);
+		SecurityContextHolder.getContext().setAuthentication(auth);
+
+```
+
 ---
 
 로그인 / 로그아웃 기능은 **Spring Security**를 사용해 구현하기로 결정했습니다.
