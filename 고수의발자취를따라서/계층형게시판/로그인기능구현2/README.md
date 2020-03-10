@@ -34,6 +34,46 @@ JPA에서는 엔티티를 조회했을 때 조회 상태 그대로를 **스냅�
 
 그리고 트랜잭션이 끝나는 시점에 이 스냅샷과 비교해 다른점이 있으면 Updata Query를 DB에 전달합니다.
 
+먼저 Users Entity를 수정하겠습니다.
+
+**Users.java**
+
+```java
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@DynamicUpdate
+public class Users extends BaseTimeEntity {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	
+	@Column(length = 20,unique = true, nullable = false)
+	private String userId;
+	
+	@Column(nullable = false)
+	private String password;
+	
+	@Column(unique = true)
+	private String userName;
+	
+	@Builder
+	public Users(String userId, String password, String userName) {
+		this.userId = userId;
+		this.password = password;
+		this.userName = userName;
+	}
+	
+	public void changeUserName(String userName) {
+		this.userName = userName;
+	}
+}
+```
+
+엔티티의 값을 수정할 수 있도록 **changeUserName** 이라는 메서드를 만들었습니다.
+
+
 
 시큐리티 유저 정보 변경
 ```
