@@ -16,13 +16,45 @@
 
 ---
 
-구현에 앞서 계층형 게시판의 개념, 쿼리작성 법을 먼저 정리하고 넘어가겠습니다.
-
 #### 계층형 게시판
 
 계층형 게시판이 생소할 수도 있겠지만 의외로 주변에서 흔히 볼수있는 형식입니다.
 
+대표적으로 답글을 다는 기능이 계층형이라고 생각하시면 됩니다.
 
+
+
+
+
+
+https://mysqlserverteam.com/mysql-8-0-labs-recursive-common-table-expressions-in-mysql-ctes-part-three-hierarchies/
+```sql
+with RECURSIVE cts as (
+	select  id
+		,name
+        ,p_id
+        ,depth
+        ,CAST(id as char(99)) lvl
+	from test
+    where p_id is null
+    union all
+    select b.id
+		,b.name
+        ,b.p_id
+        ,b.depth
+        ,concat(c.lvl, ",", b.id) lvl
+        from test b
+        inner join cts c
+        on b.p_id = c.id
+)
+select id
+	, concat(REPEAT("          ", depth),"ㄴ",name) as name
+    ,p_id
+    ,lvl
+    ,depth
+from cts 
+order by lvl  
+```
 
 **Users.java**
 
