@@ -30,12 +30,42 @@
 
 하지만 **MYSQL**에는 그런 기능이 없습니다.
 
-대신 **재귀 쿼리** 를 사용할 수 있습니다.
+대신 구현하는 방법이 몇가지 있었습니다.
+
+#### 1. [함수를 정의하는 방법](https://shlee0882.tistory.com/241)
+
+함수를 정의하는 방법은 구현이 복잡하다는 단점이 있습니다.
+
+
+#### 2. [테이블 구조를 이용하는 방법](http://mikehillyer.com/articles/managing-hierarchical-data-in-mysql/)
+
+테이블 구조를 이용하는 방법은 계층이 추가될때마다 나머지 데이터들을 수정해줘야한다는 단점이 있습니다. 
+
+#### 3. [사용자 정의 변수를 사용하는 방법](https://12teamtoday.tistory.com/25)
+
+사용자 정의 변수를 이용하면 **WHERE** 조건을 통해 하위 계층을 검색할 수 있지만 전체적인 계층 구조에 대한 검색은 되지않는다는 단점이 있습니다.
+
+#### 4. [재귀 쿼리를 사용하는 방법](https://mysqlserverteam.com/mysql-8-0-labs-recursive-common-table-expressions-in-mysql-ctes-part-three-hierarchies/)
+
+**MYSQL 5.7버전 이하** 에서는 동작하지 않고, 
+
+해당 테이블의 행만큼 반복하기 때문에 역시 효율이 좋지는 않습니다.
+
+이밖에도 [소수점 계층형 방식](https://gopenguin.tistory.com/7) 이라고 해서 계층에 대한 컬럼하나를 추가해 정렬을 통한 계층형 구조를 표현하는 방식이 있었습니다.
+
+여러가지 방법이 있지만...
+
+전부 그렇게 효율이 좋은 것 같지는 않았습니다.
+
+이 중에서 **재귀 쿼리** 사용하여 구현하겠습니다.
 
 **5.7 버전 이하 에서는 사용할 수 없습니다.**
 
-[mysql server blog](https://mysqlserverteam.com/mysql-8-0-labs-recursive-common-table-expressions-in-mysql-ctes-part-three-hierarchies/) 를 참고하여 만들었습니다.
+재귀 쿼리를 사용할 때는 몇가지 **주의 사항**이 있습니다.
 
+
+
+https://unrealengine.tistory.com/163
 ```sql
 with RECURSIVE cts as (
 	select  id
