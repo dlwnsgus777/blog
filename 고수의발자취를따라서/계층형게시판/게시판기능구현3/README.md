@@ -39,6 +39,65 @@ CRUD란
 
 **boards**, **images** 패키지를 생성합니다.
 
+**board** 패키지 안에 **Boards** 클래스를 생성합니다.
+
+ **Boards** (import 부분은 생략했습니다)
+
+```java
+package com.board.webserivce.domain.boards;
+
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@DynamicUpdate
+public class Boards extends BaseTimeEntity {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	
+	@ColumnDefault("0")
+	private int depth;
+	
+	@Column(length = 200, nullable = false)
+	private String title;
+	
+	@Column(columnDefinition = "TEXT", nullable = false)
+	private String content;
+	
+	@ColumnDefault("null")
+	private Long parentId;
+	
+	@ManyToOne
+	@JoinColumn(name = "author_id")
+	private Users author;
+	
+	@OneToMany(orphanRemoval = true)
+	@JoinColumn(name = "boardId")
+	private List<Images> images = new ArrayList<>();
+	
+	@Builder
+	public Boards(String content, String title, Long parentId, int depth, Users author) {
+		this.title = title;
+		this.content = content;
+		this.parentId = parentId;
+		this.depth = depth;
+		this.author = author;
+	}
+	
+	public void deleteBoard() {
+		this.title = "삭제 되었습니다.";
+		this.author = null;
+	}
+}
+```
+
+
+![createEntity](images/createfile.png)
+
+
+
+
 기능을 구현하기 전에 화면을 먼저 만들겠습니다.
 
 게시글을 보는 페이지를 만들겠습니다.
