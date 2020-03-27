@@ -18,7 +18,7 @@
 
 이제 본격적으로 게시판의 기능을 구현해보도록 하겠습니다.
 
-기능은 CRUD의 순서로 해보겠습니다.
+기본적인 CRUD기능을 구현하겠습니다.
 
 CRUD란
 
@@ -28,6 +28,8 @@ CRUD란
 - Delete
 
 의 앞 글자들을 따서 CRUD라고 부릅니다.
+
+구현의 순서는 딱히 상관이 없습니다. 
 
 그럼 CRUD의 앞글자 **C**
 
@@ -42,6 +44,8 @@ CRUD란
 **board** 패키지 안에 **Boards** 클래스를 생성합니다.
 
  **Boards** (import 부분은 생략했습니다)
+
+ 전체 코드는 **[Git Hub](https://github.com/dlwnsgus777)** 에 있습니다.
 
 ```java
 package com.board.webserivce.domain.boards;
@@ -83,11 +87,6 @@ public class Boards extends BaseTimeEntity {
 		this.parentId = parentId;
 		this.depth = depth;
 		this.author = author;
-	}
-	
-	public void deleteBoard() {
-		this.title = "삭제 되었습니다.";
-		this.author = null;
 	}
 }
 ```
