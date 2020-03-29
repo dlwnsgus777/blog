@@ -29,11 +29,9 @@ CRUD란
 
 의 앞 글자들을 따서 CRUD라고 부릅니다.
 
-구현의 순서는 딱히 상관이 없습니다. 
+구현의 순서는 딱히 상관이 없습니다.
 
-그럼 CRUD의 앞글자 **C**
-
-**Create** 기능을 만들겠습니다.
+먼저 Entity를 생성하고, 관계를 연결시키겠습니다.
 
 ![mkdir](images/mkdir.png)
 
@@ -43,9 +41,9 @@ CRUD란
 
 **board** 패키지 안에 **Boards** 클래스를 생성합니다.
 
- **Boards** (import 부분은 생략했습니다)
+**Boards** (import 부분은 생략했습니다)
 
- 전체 코드는 **[Git Hub](https://github.com/dlwnsgus777)** 에 있습니다.
+전체 코드는 **[Git Hub](https://github.com/dlwnsgus777)** 에 있습니다.
 
 ```java
 package com.board.webserivce.domain.boards;
@@ -55,31 +53,31 @@ package com.board.webserivce.domain.boards;
 @Entity
 @DynamicUpdate
 public class Boards extends BaseTimeEntity {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@ColumnDefault("0")
 	private int depth;
-	
+
 	@Column(length = 200, nullable = false)
 	private String title;
-	
+
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
-	
+
 	@ColumnDefault("null")
 	private Long parentId;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "author_id")
 	private Users author;
-	
+
 	@OneToMany(orphanRemoval = true)
 	@JoinColumn(name = "boardId")
 	private List<Images> images = new ArrayList<>();
-	
+
 	@Builder
 	public Boards(String content, String title, Long parentId, int depth, Users author) {
 		this.title = title;
@@ -91,11 +89,56 @@ public class Boards extends BaseTimeEntity {
 }
 ```
 
+게시글을 저장하는 Entity 입니다.
+
+```java
+package com.board.webserivce.domain.images;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.DynamicUpdate;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@DynamicUpdate
+public class Images {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(nullable = false)
+	private String fileName;
+
+	private Long boardId;
+
+	@Builder
+	public Images(String fileName, Long boardId) {
+		this.fileName = fileName;
+		this.boardId = boardId;
+	}
+}
+```
+
+이미지를 저장하는 Entity 입니다.
+
+- Boards
+- Users
+- Images
+
+이 3개의 Entity에 대한 관계를 설명하겠습니다.
 
 ![createEntity](images/createfile.png)
-
-
-
 
 기능을 구현하기 전에 화면을 먼저 만들겠습니다.
 
