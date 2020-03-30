@@ -12,13 +12,13 @@
 
 #### 6. 게시판 기능 구현
 
-### 게시판 기능 구현 - **C**RUD
+### 게시판 기능 구현 - 연관 관계 매핑
 
 ---
 
 이제 본격적으로 게시판의 기능을 구현해보도록 하겠습니다.
 
-기본적인 CRUD기능을 구현하겠습니다.
+기본적인 CRUD기능을 구현하기 전에 Entitiy의 연관 관계를 설정하겠습니다.
 
 CRUD란
 
@@ -29,9 +29,7 @@ CRUD란
 
 의 앞 글자들을 따서 CRUD라고 부릅니다.
 
-구현의 순서는 딱히 상관이 없습니다.
-
-먼저 Entity를 생성하고, 관계를 연결시키겠습니다.
+---
 
 ![mkdir](images/mkdir.png)
 
@@ -90,6 +88,8 @@ public class Boards extends BaseTimeEntity {
 ```
 
 게시글을 저장하는 Entity 입니다.
+
+마찬가지로 **images** 패키지 안에 **Images** 클래스를 생성합니다.
 
 ```java
 package com.board.webserivce.domain.images;
