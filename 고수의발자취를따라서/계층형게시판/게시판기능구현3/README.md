@@ -72,7 +72,7 @@ public class Boards extends BaseTimeEntity {
 	@JoinColumn(name = "author_id")
 	private Users author;
 
-	@OneToMany(orphanRemoval = true)
+	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
 	@JoinColumn(name = "boardId")
 	private List<Images> images = new ArrayList<>();
 
@@ -138,7 +138,33 @@ public class Images {
 
 이 3개의 Entity에 대한 관계를 설명하겠습니다.
 
-![createEntity](images/createfile.png)
+![post_image](images/post_images.png)
+
+위의 사진처럼 **하나**의 게시글에는 **여러개**의 이미지를 가질 수 있습니다.
+
+하나의 게시글이 여러개의 이미지
+
+- One to Many
+
+```java
+	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+	@JoinColumn(name = "boardId")
+	private List<Images> images = new ArrayList<>()
+```
+
+코드로 표현하면 이렇게 할 수 있습니다.
+
+JPA에서는 연관 관계를 매핑하면 새로운 테이블을 만들어서 관리하게 됩니다.
+
+이렇게 따로 테이블을 만들어 연관 관계를 매핑하지 않고 연관 관계를 관리하려면
+
+```
+@JoinColumn(name = "boardId")
+```
+
+이렇게 어노테이션을 설정하면 됩니다.
+
+Images 엔티티에 있는 boardId 컬럼이랑 매핑이 된다고 생각하시면 됩니다.
 
 기능을 구현하기 전에 화면을 먼저 만들겠습니다.
 
