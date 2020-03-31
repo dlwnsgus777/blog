@@ -138,6 +138,20 @@ public class Images {
 
 이 3개의 Entity에 대한 관계를 설명하겠습니다.
 
+JPA에서는 JDBC를 사용할 때 처럼 참조하는 테이블의 PK를 변수로 가지고 있지 않고
+
+참조하는 테이블의 **객체**를 가지고 있습니다.
+
+```java
+	@ManyToOne
+	@JoinColumn(name = "author_id")
+	private Users author;
+```
+
+Boards 엔티티의 author라는 맴버 변수는 
+Users라는 엔티티의 객체를 자료형으로 가지고 있습니다.
+
+
 ![post_image](images/post_images.png)
 
 위의 사진처럼 **하나**의 게시글에는 **여러개**의 이미지를 가질 수 있습니다.
@@ -165,6 +179,14 @@ JPA에서는 연관 관계를 매핑하면 새로운 테이블을 만들어서 �
 이렇게 어노테이션을 설정하면 됩니다.
 
 Images 엔티티에 있는 boardId 컬럼이랑 매핑이 된다고 생각하시면 됩니다.
+
+이와 비슷한 개념으로는 
+
+* Many To One 
+
+이 있습니다.
+
+
 
 기능을 구현하기 전에 화면을 먼저 만들겠습니다.
 
