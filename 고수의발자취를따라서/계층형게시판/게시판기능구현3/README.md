@@ -142,14 +142,47 @@ JPA에서는 JDBC를 사용할 때 처럼 참조하는 테이블의 PK를 변수
 
 참조하는 테이블의 **객체**를 가지고 있습니다.
 
-```java
-	@ManyToOne
-	@JoinColumn(name = "author_id")
+```java 
+  // jpa
 	private Users author;
 ```
 
 Boards 엔티티의 author라는 맴버 변수는 
 Users라는 엔티티의 객체를 자료형으로 가지고 있습니다.
+
+단순히 저렇게 변수만 선언한다고 연관관계가 성립되지는 않습니다.
+
+```java
+	@ManyToOne
+	@JoinColumn(name = "author_id")
+	private Users author;
+```
+위의 코드 처럼 연관 관계를 맺어주는 어노테이션을 사용해야합니다.
+
+코드에 대한 설명을 하기에 앞서 개념에 대한 설명을 간단히 하겠습니다.
+
+#### 1) 다중성
+* Many to One - 다대일
+
+  N : 1 관계 입니다. 
+
+  예를들어 
+
+* Many To Many - 다대다
+
+  N : 1 관계 입니다. 
+
+  예를들어 
+* One To Many - 일대다
+
+  N : 1 관계 입니다. 
+
+  예를들어 
+* One To One - 일대일
+
+  N : 1 관계 입니다. 
+
+  예를들어 
 
 
 ![post_image](images/post_images.png)
