@@ -18,16 +18,158 @@
 
 이제 본격적으로 게시판의 기능을 구현해보도록 하겠습니다.
 
-기본적인 CRUD기능을 구현하기 전에 Entitiy의 연관 관계를 설정하겠습니다.
+먼저 게시글을 조회하는 기능을 만들겠습니다.
 
-CRUD란
+현재 계층형 게시판을 만들고 있기 때문에
 
-- Create
-- Read
-- Update
-- Delete
+**[저번 포스트](https://pro-dev.tistory.com/37?category=830872)** 에서 만들어 놓은 쿼리를 수정하여 적용하겠습니다.
 
-의 앞 글자들을 따서 CRUD라고 부릅니다.
+```sql
+WITH RECURSIVE CTS AS (
+				SELECT  id
+					   ,title
+			           ,content
+			           ,depth
+			           ,parent_id
+			           ,author_id
+					   ,created_date
+			           ,modified_date
+			           ,CAST(id as CHAR(255)) lvl
+                       ,id as groupno
+				FROM boards
+			    WHERE parent_id IS NULL
+			    UNION ALL
+			    SELECT  b.id
+					   ,b.title
+			           ,b.content
+			           ,b.depth
+			           ,b.parent_id
+			           ,b.author_id
+			           ,b.created_date
+			           ,b.modified_date
+			           ,CONCAT(c.lvl, ",", b.id) lvl
+			           ,substring_index(c.lvl, ",",1) as groupno
+				FROM boards b
+				INNER JOIN CTS c
+				ON b.parent_id = c.id
+			)
+			SELECT b.id
+				  ,title
+			      ,content
+			      ,depth
+			      ,parent_id
+			      ,b.created_date
+			      ,b.modified_date
+				  ,author_id
+                  ,lvl
+                  ,groupno
+			from cts as b
+			ORDER BY groupno desc, lvl
+```
+
+게시글을 조회하는 쿼리입니다.
+현재 생성한 Entity에 맞게 쿼리를 수정했습니다.
+
+최신글을 상단에 표시하기 위해
+
+**groupno** 라는 컬럼을 만들어 게시글과 해당 게시글의 답글을 묶어놨습니다.
+
+```java
+public interface BoardsRepository extends JpaRepository<Boards, Long> {
+	@Query(value = "WITH RECURSIVE CTS AS (\r\n" +
+			"	SELECT  id\r\n" +
+			"		   ,title\r\n" +
+			"           ,content\r\n" +
+			"           ,depth\r\n" +
+			"           ,parent_id\r\n" +
+			"           ,author_id\r\n" +
+			"		   ,created_date\r\n" +
+			"           ,modified_date\r\n" +
+			"           ,CAST(id as CHAR(255)) lvl\r\n" +
+            "           ,id as groupno\r\n" +
+			"	FROM boards\r\n" +
+			"    WHERE parent_id IS NULL\r\n" +
+			"    UNION ALL\r\n" +
+			"    SELECT  b.id\r\n" +
+			"		   ,b.title\r\n" +
+			"           ,b.content\r\n" +
+			"           ,b.depth\r\n" +
+			"           ,b.parent_id\r\n" +
+			"           ,b.author_id\r\n" +
+			"           ,b.created_date\r\n" +
+			"           ,b.modified_date\r\n" +
+			"           ,CONCAT(c.lvl, \",\", b.id) lvl\r\n" +
+			"           ,substring_index(c.lvl, \",\",1) as groupno\r\n" +
+			"	FROM boards b\r\n" +
+			"	INNER JOIN CTS c\r\n" +
+			"	ON b.parent_id = c.id\r\n" +
+			")\r\n" +
+			"SELECT b.id\r\n" +
+			"	  ,title\r\n" +
+			"      ,content\r\n" +
+			"      ,depth\r\n" +
+			"      ,parent_id\r\n" +
+			"      ,b.created_date\r\n" +
+			"      ,b.modified_date\r\n" +
+			"	  ,author_id\r\n" +
+			"from cts as b\r\n" +
+			"ORDER BY groupno desc, lvl",
+			countQuery = "SELECT count(*) FROM boards",
+			nativeQuery = true)
+	Page<Boards> findAllBoards(Pageable pageable);
+}
+```
+
+Native 쿼리를 사용하기 위해 위처럼 작성했습니다.
+
+추가로 게시글을 조회할때 페이징 처리를 위해 **Pageable** 기능을 사용하였습니다.
+
+```
+Page<Boards> findAllBoards(Pageable pageable);
+```
+
+이렇게 **Pageable**을 매개변수로 전달해주면 Page처리를 비교적 쉽게할 수 있습니다.
+
+자세한 부분은 아래에서 설명하겠습니다.
+
+어떤 경우라도 Entity를 외부에 노출해서는 안되기때문에
+
+**controller**에서 값을 전달해 주기위해 **DTO**를 만들겠습니다.
+
+![boardfindall](images/boardfindall.png)
+
+**service** 패키지 안에 **BoardService** 클래스를 생성합니다.
+
+```java
+@Service
+@AllArgsConstructor
+public class BoardService {
+	private BoardsRepository boardRepository;
+	private UsersRepository usersRepository;
+
+	@Transactional
+	public Page<BoardsFindAllResponseDto> findAllPost(int page) {
+		int pageNumber = page - 1;
+		Pageable pageAble = PageRequest.of(pageNumber, 10);
+		Page<Boards> boards = boardRepository.findAllBoards(pageAble);
+
+		Page<BoardsFindAllResponseDto> boardsDto = boards.map(new Function<Boards, BoardsFindAllResponseDto>() {
+
+			@Override
+			public BoardsFindAllResponseDto apply(Boards t) {
+				// TODO Auto-generated method stub
+				BoardsFindAllResponseDto dto = new BoardsFindAllResponseDto();
+				dto.converEntityToDto(t);
+				return dto;
+			}
+
+		});
+
+		return boardsDto;
+	}
+}
+
+```
 
 ---
 
