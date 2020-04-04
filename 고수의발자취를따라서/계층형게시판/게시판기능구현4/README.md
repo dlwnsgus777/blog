@@ -138,6 +138,70 @@ Page<Boards> findAllBoards(Pageable pageable);
 
 ![boardfindall](images/boardfindall.png)
 
+**dto** 패키지 안에 **boards** 패키지에
+
+**BoardsFindAllResponseDto** 클래스를 생성합니다.
+
+```java
+package com.board.webserivce.dto.boards;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.board.webserivce.domain.boards.Boards;
+import com.board.webserivce.domain.users.Users;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class BoardsFindAllResponseDto {
+	private Long id;
+	private String title;
+	private Long authorId;
+	private int depth;
+	private String authorName;
+	private LocalDate createdDate;
+
+	public void converEntityToDto(Boards boards) {
+		this.id = boards.getId();
+		this.title = boards.getTitle();
+		this.authorId = boards.getAuthor() == null ? null :  boards.getAuthor().getId();
+		this.depth = boards.getDepth();
+		this.authorName = boards.getAuthor() == null ? null :boards.getAuthor().getUserName();
+		this.createdDate = boards.getCreatedDate();
+	}
+}
+```
+
+화면의 게시글 목록으로 보내줄 DTO 입니다.
+
+화면에 Entity를 그대로 보내게되면 원치않은 값이 화면으로 내려갈 수도 있습니다.
+
+회원 비밀번호 같이 노출이 되면 위험한 값들이 화면에 내려가서는 안됩니다.
+
+그렇기 때문에 원하는 값만을 DTO에 담아 화면에 내려주도록 하겠습니다.
+
+```java
+	public void converEntityToDto(Boards boards) {
+		this.id = boards.getId();
+		this.title = boards.getTitle();
+		this.authorId = boards.getAuthor() == null ? null :  boards.getAuthor().getId();
+		this.depth = boards.getDepth();
+		this.authorName = boards.getAuthor() == null ? null :boards.getAuthor().getUserName();
+		this.createdDate = boards.getCreatedDate();
+	}
+```
+
+DTO의 **converEntityToDto** 메서드는 Entity로 검색한 값을 DTO로 변환해주기 위해 사용합니다.
+
+![boardservice](images/boardservice.png)
+
 **service** 패키지 안에 **BoardService** 클래스를 생성합니다.
 
 ```java
@@ -145,7 +209,6 @@ Page<Boards> findAllBoards(Pageable pageable);
 @AllArgsConstructor
 public class BoardService {
 	private BoardsRepository boardRepository;
-	private UsersRepository usersRepository;
 
 	@Transactional
 	public Page<BoardsFindAllResponseDto> findAllPost(int page) {
@@ -162,13 +225,77 @@ public class BoardService {
 				dto.converEntityToDto(t);
 				return dto;
 			}
-
 		});
 
 		return boardsDto;
 	}
 }
 
+```
+
+화면에 내려줄 페이지를 정하기위해 Pageable 객체를 만들어 매개변수로 보내게 됩니다.
+
+후에 검색해 온 값을
+
+**Entity**에서 **DTO** 값으로 변경해줍니다.
+
+이제 **WebController**를 작성해보겠습니다.
+
+Pageable의 page는 0부터 시작하기때문에 화면에서 올라온 값에서 1을 빼줍니다.
+
+화면에서의 Pagenation은 1부터 시작하기때문입니다.
+
+```java
+package com.board.webserivce.web;
+
+@Controller
+@AllArgsConstructor
+public class WebController {
+	private UsersRepository userRepository;
+	private BoardService boardService;
+
+	@GetMapping("/")
+	public String init() {
+		return "contents/index";
+	}
+
+	@GetMapping("/board")
+	public String hello() {
+		return "contents/board";
+	}
+
+	@GetMapping("/login/error")
+	public String error() {
+		return "contents/error";
+	}
+
+	@PostMapping("/login/fail")
+	public String initPost() {
+		return "contents/index";
+	}
+
+	@GetMapping("/info")
+	public String info(Principal principal, ModelMap model) {
+		Optional<Users> users = userRepository.findByUserId(principal.getName());
+		Users user = users.get();
+
+		model.addAttribute("userName", user.getUserName());
+
+		return "contents/info";
+	}
+
+	@GetMapping("/posts")
+	public String getPosts(@RequestParam("page") int page, ModelMap model) {
+		Page<BoardsFindAllResponseDto> boards = boardService.findAllPost(page);
+		Pageable pageAble = boards.getPageable();
+		System.out.println(LocalDate.now());
+		model.addAttribute("page", PageUtils.getPages(pageAble, boards.getTotalPages()));
+		model.addAttribute("posts", boards);
+		model.addAttribute("nowTime", LocalDate.now());
+		model.addAttribute("msg", "success");
+		return  "cmmn/postList";
+	}
+}
 ```
 
 ---
