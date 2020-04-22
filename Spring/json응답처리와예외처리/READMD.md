@@ -316,7 +316,7 @@ public class WebControllerTest {
 
 상황에 따라 더 자세하게 Json 포맷 설정과 예외처리를 할 수 있습니다.
 
-#### 참고자료
+#### 참고자료들
 
 https://imasoftwareengineer.tistory.com/35
 
