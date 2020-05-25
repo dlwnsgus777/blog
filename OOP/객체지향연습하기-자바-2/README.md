@@ -115,7 +115,11 @@ _발그림... 죄송합니다_
 
 **Frame.java**
 ```java
-
+public class Frame {
+    public void rollingBall() {
+        // TODO:
+    }
+}
 ```
 
 
