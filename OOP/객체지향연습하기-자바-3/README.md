@@ -53,9 +53,57 @@ public class Pins {
 
 그래서 변경의 기능을 하는 메소드는 외부에 노출시키지 않도록하겠습니다.
 
+이제 테스트를 해보겠습니다.
+
+```java
+public class PinsTests {
+
+    @Test
+    public void 볼링핀이_HIT_되는지_테스트() {
+        try {
+            // given
+            Pins pins = new Pins();
+
+            Method method = pins.getClass().getDeclaredMethod("hitBowlingPin", int.class);
+            method.setAccessible(true);
+
+            // when
+            method.invoke(pins, 3);
+
+            // then
+            Field field = pins.getClass().getDeclaredField("bowlingPins");
+            field.setAccessible(true);
+
+            int resultPin = (int) field.get(pins);
+
+            assertThat(resultPin, is(7));
+
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+```
+
+**hitBowlingPin** 메소드에 대한 테스트 코드입니다.
+
+테스트 코드에 대한 설명은 이번 포스트의 주제와는 무관하니 생략하겠습니다.
+
 ---
 
 이제 **Player** 클래스를 구현하겠습니다.
+
+플레이어는 게임을 하는 유저입니다.
+
+볼링을 할 때, 플레이어는 투구를 하여 볼링 핀을 맞추어 점수를 획득하는 일에 집중하게 됩니다.
+
 
 
 
