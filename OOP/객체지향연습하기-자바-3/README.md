@@ -104,6 +104,100 @@ public class PinsTests {
 
 볼링을 할 때, 플레이어는 투구를 하여 볼링 핀을 맞추어 점수를 획득하는 일에 집중하게 됩니다.
 
+화면에 표시되는 점수가 어떻게 계산이 되는지, 
+
+화면에는 어떻게 표시가 되는지는 플레이어와는 전혀 상관이 없습니다.
+
+대신 한명의 플레이어가 아닌 여러 플레이어가 있을때, 이를 구분지어줄 상태가 필요합니다.
+
+**Player**
+```java
+public class Player {
+    private String name;
+
+    public Player(String name) {
+        this.name = name;
+    }
+}
+```
+
+아직까지는 플레이어는 이름만 있으면 될 것 같습니다.
+
+사실 이렇게 간단한 코드도 테스트해야하나 싶지만 테스트 연습을 위해 작성하겠습니다.
+
+```java
+public class PlayerTests {
+
+    @Test
+    public void 플레이어이름이_잘_생성되는가() {
+        try {
+            // when
+            Player player = new Player("test");
+
+            // then
+            Field field =  player.getClass().getDeclaredField("name");
+            field.setAccessible(true);
+
+            String playerName = (String)field.get(player);
+
+            assertThat(playerName, is("test"));
+
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+당연한 얘기겠지만 지금까지의 구현 과정에서 객체가 다른 객체에게 값을 요구하는 메시지는 없었습니다.
+
+따라서 **Getter**를 사용하지 않았습니다.
+
+테스트 코드를 편하게 하기위해 메소드를 추가하는 건 주객이 전도되는 것이기 때문에 
+
+객체의 값이 필요하게되면 그때 **Getter**를 추가하겠습니다.
+
+---
+
+다음은 **BowlingGame** 객체를 구현하겠습니다.
+
+**BowlingGame** 은 게임의 중재자 역할이라고 생각하시면 됩니다.
+
+플레이어의 차례가 되면 공을 굴리게하고, 차례가 끝나면 다음 플레이어가 공을 굴리게 합니다.
+
+
+
+<!-- 다음은 **View** 를 구현하겠습니다.
+
+이름에서 알 수 있듯 화면에 대한 출력을 담당하는 객체입니다.
+
+View 객체의 입장에서 화면에 출력할 값들이 어떻게 계산되고, 어떻게 저장되었는지는 전혀 상관이 없습니다.
+
+그저 전달받은 값을 원하는 포맷으로 출력하는 책임만 수행하면 됩니다.
+
+구현하기 전 볼링에서는 점수를 어떻게 표현하는지 보겠습니다.
+
+![rule](images/score.png)
+
+스트라이크, 스페어가 아닌 단순히 핀만 넘어뜨렸을 때는 **숫자**
+
+스트라이크는 **X** 스페어는 **/**
+
+아무것도 못 넘어뜨렸을 때는 **-** 
+
+이렇게 표현하게됩니다.
+
+이 부분은 출력 객체가 담당하기보다는 **enum**을 만들어 관리하는게 좀 더 나아보입니다.
+
+**enum**을 먼저 구현한 뒤 View를 구현하겠습니다.
+
+![add enum](images/addenum.png)
+
+**Rule** Enum을 추가하겠습니다. 
+
+**View** -->
+
 
 
 
