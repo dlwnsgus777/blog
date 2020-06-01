@@ -6,8 +6,6 @@
 
 이번 포스트부터는 기능의 구현을 통해 객체 간의 협력이 어떻게 이루어지는지 살펴보도록 하겠습니다.
 
-비교적 기능이 간단한 클래스들부터 구현하도록 하겠습니다.
-
 ---
 
 먼저 **Pin** 클래스를 구현해보도록 하겠습니다.
@@ -160,11 +158,88 @@ public class PlayerTests {
 
 ---
 
-다음은 **BowlingGame** 객체를 구현하겠습니다.
+다음은 **Frame** 객체를 구현하겠습니다.
 
-**BowlingGame** 은 게임의 중재자 역할이라고 생각하시면 됩니다.
+프레임은 총 10회, 각 프레임마다 2번의 투구 기회가있습니다.
 
-플레이어의 차례가 되면 공을 굴리게하고, 차례가 끝나면 다음 플레이어가 공을 굴리게 합니다.
+다만 플레이어가 스트라이크를 획득 했을 때는 해당 프레임의 투구 기회는 끝나고,
+
+다음 프레임의 점수에 따라서 추가 점수를 획득하게 됩니다.
+
+**게임의 마지막 프레임은 총 3번의 투구 기회를 가지게 됩니다.**
+
+```java
+public class Frame {
+    private static final int TOTAL_FRAME = 9;
+    private static final int NOMAL_FRAME = 2;
+    private static final int FINAL_FRAME = 3;
+    private static final int TOTAL_PIN = 10;
+
+    private int turn;
+
+    public Frame(int frameNumber) {
+        if (frameNumber == TOTAL_FRAME) {
+            turn = FINAL_FRAME;
+            return;
+        }
+        turn = NOMAL_FRAME;
+    }
+
+    public void calculateScore(int pinCount) {
+        if (pinCount == TOTAL_PIN) {
+            turn -= 2;
+        }
+        turn--;
+    }
+
+    public boolean hasTurn() {
+        return turn > 0;
+    }
+}
+```
+마지막 프레임일때는 총 3번의 투구 기회를 가질 수 있도록 구현했습니다.
+
+이제 테스트 코드를 작성해 보겠습니다.
+
+```java
+public class FrameTests {
+    private Frame nomalFrame;
+    private Frame finalFrame;
+
+    @Before
+    public void setUp() {
+        nomalFrame = new Frame(0);
+        finalFrame = new Frame(9);
+    }
+
+    @Test
+    public void 점수계산후_턴이_줄어드는가() {
+        //when
+        nomalFrame.calculateScore(0);
+
+        //then
+        assertThat(nomalFrame.hasTurn(), is(true));
+    }
+
+    @Test
+    public void 마지막프레임은_턴이_3번투구할수있는가() {
+        finalFrame.calculateScore(0);
+        finalFrame.calculateScore(0);
+        
+        assertThat(finalFrame.hasTurn(), is(true));
+        
+        finalFrame.calculateScore(0);
+
+        assertThat(finalFrame.hasTurn(), is(false));
+    }
+}
+```
+---
+
+이제 점수를 구하는 로직을 구현해보겠습니다.
+
+점수는 **Frame**
+
 
 
 
