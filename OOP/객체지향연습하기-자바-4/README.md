@@ -70,7 +70,7 @@ public class NomalFrame implements Frame {
 ```java
 public class FinalFrame implements Frame {
     private static final int FINAL_FRAME = 3;
-    private static final int FIRST_SHOT = 3;
+
     private static final int SECOND_SHOT = 2;
     private static final int FINAL_SHOT = 1;
 
@@ -99,15 +99,14 @@ public class FinalFrame implements Frame {
 
     private void setScore(int pinCount) {
         switch (turn) {
-            case FIRST_SHOT:
-                firstShot = pinCount;
-                break;
             case SECOND_SHOT:
                 secondShot = pinCount;
                 break;
             case FINAL_SHOT:
                 finalShot = pinCount;
                 break;
+            default:
+                firstShot = pinCount;
         }
     }
 
