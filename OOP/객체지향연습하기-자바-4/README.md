@@ -116,7 +116,7 @@ public class FinalFrame implements Frame {
 }
 ```
 
-위처럼 Frame 객체를 구현했습니다. 
+위처럼 Frame 객체를 구현했습니다.
 
 투구시마다 해당 차례에 대한 점수를 저장하는 방식으로 구현했습니다.
 
@@ -128,7 +128,7 @@ public class FinalFrame implements Frame {
 
 점수 계산을 하려고보니 Frame 객체에서 맡은 책임이 많아지는 것 같습니다.
 
-게다가 
+게다가
 
 ```java
     // FinalFrame의 인스턴스 변수
@@ -144,11 +144,134 @@ public class FinalFrame implements Frame {
 
 현재 Frame에는 투구 횟수와 관련된 책임만 가지고,
 
-점수 계산은 다른 객체에게 책임을 위임하겠습니다.
+점수 저장에 대한 객체를 따로 만들어 점수 관리에 대한 책임을 위임하겠습니다.
 
 대신, **해당 프레임에서 획득한 점수** 이기 때문에 Frame과 연관 관계를 맺도록 하겠습니다.
 
 **Score**
 
+```java
+public class Score {
+    private static final int FINAL_FRAME = 3;
+    private static final int SECOND_SHOT = 2;
+    private static final int FINAL_SHOT = 1;
 
+    private int firstShot;
+    private int secondShot;
+    private int finalShot;
 
+    public Score(int frameState) {
+        if (frameState == FINAL_FRAME) {
+            finalShot = 0;
+        }
+        firstShot = 0;
+        secondShot = 0;
+    }
+
+    public void setScore(int pinCount, int turn) {
+        switch (turn) {
+            case SECOND_SHOT:
+                secondShot = pinCount;
+                break;
+            case FINAL_SHOT:
+                finalShot = pinCount;
+                break;
+            default:
+                firstShot = pinCount;
+        }
+    }
+
+    public int getTotalScore() {
+        return firstShot + secondShot + firstShot;
+    }
+
+    public boolean hasFinalTurn() {
+        return firstShot + secondShot == 10;
+    }
+}
+```
+
+**NomalFrame**
+
+```java
+public class NomalFrame implements Frame {
+    private static final int NOMAL_FRAME = 2;
+    private static final int TOTAL_PIN = 10;
+
+    private int turn;
+    private Score score;
+
+    public NomalFrame() {
+        turn = NOMAL_FRAME;
+        score = new Score(turn);
+    }
+
+    @Override
+    public boolean hasTurn() {
+        return turn > 0;
+    }
+
+    @Override
+    public void playBawling(int pinCount) {
+        setScore(pinCount);
+        setTurn(pinCount);
+    }
+
+    private void setScore(int pinCount) {
+        score.setScore(pinCount, turn);
+    }
+
+    private void setTurn(int pinCount) {
+        if (pinCount == TOTAL_PIN) {
+            turn -= 2;
+            return;
+        }
+        turn--;
+    }
+}
+```
+
+**FinalFrame**
+
+```java
+public class FinalFrame implements Frame {
+    private static final int FINAL_FRAME = 3;
+    private static final int SECOND_TURN = 2;
+
+    private int turn;
+    private Score score;
+
+    public FinalFrame() {
+        turn = FINAL_FRAME;
+        score = new Score(turn);
+    }
+
+    @Override
+    public boolean hasTurn() {
+        return turn > 0;
+    }
+
+    @Override
+    public void playBawling(int pinCount) {
+        setScore(pinCount);
+        setTurn();
+    }
+
+    private void setScore(int pinCount) {
+        score.setScore(pinCount, turn);
+    }
+
+    private void setTurn() {
+        if (turn == SECOND_TURN && score.hasFinalTurn()) {
+            turn -= 2;
+        }
+        turn--;
+    }
+}
+```
+
+---
+
+위와 같이 **Frame 객체와 Score 객체** 를 만들었습니다.
+
+이제 테스트 코드를 작성해보도록 하겠습니다.
