@@ -153,32 +153,28 @@ public class FinalFrame implements Frame {
 ```java
 public class Score {
     private static final int FINAL_FRAME = 3;
-    private static final int SECOND_SHOT = 2;
-    private static final int FINAL_SHOT = 1;
+
+    private static final int NOMAL_FRAME_FIRST_TURN = 2;
+
+    private static final int FINAL_FRAME_FIRST_TURN = 3;
+    private static final int FINAL_FRAME_SECOND_TURN = 2;
 
     private int firstShot;
     private int secondShot;
     private int finalShot;
 
     public Score(int frameState) {
-        if (frameState == FINAL_FRAME) {
-            finalShot = 0;
-        }
         firstShot = 0;
         secondShot = 0;
+        finalShot = frameState == FINAL_FRAME ? 0 : -1;
     }
 
     public void setScore(int pinCount, int turn) {
-        switch (turn) {
-            case SECOND_SHOT:
-                secondShot = pinCount;
-                break;
-            case FINAL_SHOT:
-                finalShot = pinCount;
-                break;
-            default:
-                firstShot = pinCount;
-        }
+       if (finalShot != -1) {
+           finalFrameSetScroe(pinCount, turn);
+           return;
+       }
+       nomalFrameSetScore(pinCount, turn);
     }
 
     public int getTotalScore() {
@@ -186,7 +182,32 @@ public class Score {
     }
 
     public boolean hasFinalTurn() {
-        return firstShot + secondShot == 10;
+        return firstShot + secondShot >= 10;
+    }
+
+    private void finalFrameSetScroe(int pinCount, int turn) {
+        switch (turn) {
+            case FINAL_FRAME_FIRST_TURN:
+                firstShot = pinCount;
+                break;
+            case FINAL_FRAME_SECOND_TURN:
+                secondShot = pinCount;
+                break;
+            default:
+                finalShot = pinCount;
+                break;
+        }
+    }
+
+    private void nomalFrameSetScore(int pinCount, int turn) {
+        switch (turn) {
+            case NOMAL_FRAME_FIRST_TURN:
+                firstShot = pinCount;
+                break;
+            default:
+                secondShot = pinCount;
+                break;
+        }
     }
 }
 ```
@@ -262,7 +283,7 @@ public class FinalFrame implements Frame {
     }
 
     private void setTurn() {
-        if (turn == SECOND_TURN && score.hasFinalTurn()) {
+        if (turn == SECOND_TURN && !score.hasFinalTurn()) {
             turn -= 2;
         }
         turn--;
@@ -274,4 +295,171 @@ public class FinalFrame implements Frame {
 
 위와 같이 **Frame 객체와 Score 객체** 를 만들었습니다.
 
-이제 테스트 코드를 작성해보도록 하겠습니다.
+이제 테스트 코드를 작성해 보겠습니다.
+
+**NomalFrameTests** 
+
+```java
+public class NomalFrameTests {
+    private Frame nomalFrame;
+
+    @Before
+    public void setUp() {
+        nomalFrame = new NomalFrame();
+    }
+
+    @Test
+    public void 점수계산후_턴이_줄어드는가() {
+        //when
+        nomalFrame.playBawling(0);
+
+        //then
+        assertThat(nomalFrame.hasTurn(), is(true));
+    }
+
+    @Test
+    public void 스트라이크시_턴이_줄어드는가() {
+         nomalFrame.playBawling(10);
+
+        assertThat(nomalFrame.hasTurn(), is(false));
+    }
+}
+```
+
+**FinalFrameTests**
+
+```java
+public class FinalFrameTests {
+    private Frame finalFrame;
+
+    @Before
+    public void setUp() {
+        finalFrame = new FinalFrame();
+    }
+
+    @Test
+    public void 마지막_프레임에서_스페어_획득시_3개의_턴을_가지고있는가() {
+        finalFrame.playBawling(2);
+        finalFrame.playBawling(8);
+
+        assertThat(finalFrame.hasTurn(), is(true));
+    }
+
+    @Test
+    public void 마지막_프레임에서_스트라이크_획득시_3개의_턴을_가지고있는가() {
+        finalFrame.playBawling(10);
+
+        assertThat(finalFrame.hasTurn(), is(true));
+
+        finalFrame.playBawling(2);
+
+        assertThat(finalFrame.hasTurn(), is(true));
+
+        finalFrame.playBawling(2);
+
+        assertThat(finalFrame.hasTurn(), is(false));
+    }
+
+    @Test
+    public void 마지막_프레임에서_스트라이크_스페어_못했을시_턴이_2개인가() {
+        finalFrame.playBawling(2);
+
+        assertThat(finalFrame.hasTurn(), is(true));
+
+        finalFrame.playBawling(2);
+
+        assertThat(finalFrame.hasTurn(), is(false));
+    }
+}
+```
+
+**ScoreTests**
+
+```java
+public class ScoreTests {
+    private Score nomalFrameScore;
+    private Score finalFrameScore;
+
+    @Before
+    public void setUp() {
+        finalFrameScore = new Score(3);
+        nomalFrameScore = new Score(2);
+    }
+
+    @Test
+    public void 마지막_프레임일때_점수가_잘_저장되는가() throws NoSuchFieldException, IllegalAccessException {
+        finalFrameScore.setScore(4, 3);
+        finalFrameScore.setScore(5, 2);
+        finalFrameScore.setScore(6, 1);
+
+        Field firstShot = finalFrameScore.getClass().getDeclaredField("firstShot");
+        Field secondShot = finalFrameScore.getClass().getDeclaredField("secondShot");
+        Field finalShot = finalFrameScore.getClass().getDeclaredField("finalShot");
+
+        firstShot.setAccessible(true);
+        secondShot.setAccessible(true);
+        finalShot.setAccessible(true);
+
+        int resultFirst = (int) firstShot.get(finalFrameScore);
+        int resultSecond = (int) secondShot.get(finalFrameScore);
+        int resultFinal = (int) finalShot.get(finalFrameScore);
+
+        assertThat(resultFirst, is(4));
+        assertThat(resultSecond, is(5));
+        assertThat(resultFinal, is(6));
+    }
+
+    @Test
+    public void 마지막_프레임일때_스트라이크_스페어_획득못했을때() {
+        finalFrameScore.setScore(4, 3);
+        finalFrameScore.setScore(5, 2);
+
+
+        assertThat(finalFrameScore.hasFinalTurn(), is(false));
+    }
+
+    @Test
+    public void 마지막_프레임일때_스트라이크일때() {
+        finalFrameScore.setScore(10, 3);
+
+        assertThat(finalFrameScore.hasFinalTurn(), is(true));
+    }
+
+    @Test
+    public void 마지막_프레임일때_스페어일때() {
+        finalFrameScore.setScore(8, 3);
+
+        assertThat(finalFrameScore.hasFinalTurn(), is(false));
+
+        finalFrameScore.setScore(2, 2);
+
+        assertThat(finalFrameScore.hasFinalTurn(), is(true));
+    }
+
+    @Test
+    public void NOMAL_프레임일때_점수가_잘_저장되는가() throws NoSuchFieldException, IllegalAccessException {
+        nomalFrameScore.setScore(5, 2);
+        nomalFrameScore.setScore(6, 1);
+
+        Field firstShot = nomalFrameScore.getClass().getDeclaredField("firstShot");
+        Field secondShot = nomalFrameScore.getClass().getDeclaredField("secondShot");
+
+        firstShot.setAccessible(true);
+        secondShot.setAccessible(true);
+
+        int resultFirst = (int) firstShot.get(nomalFrameScore);
+        int resultSecond = (int) secondShot.get(nomalFrameScore);
+
+        assertThat(resultFirst, is(5));
+        assertThat(resultSecond, is(6));
+    }
+}
+```
+
+---
+
+![pass tests](images/passtests.png)
+
+테스트가 전부 통과하는 걸 확인할 수 있습니다.
+
+다음 포스트에서 계속 진행하도록 하겠습니다.
