@@ -4,6 +4,8 @@
 
 [지난 포스트](https://pro-dev.tistory.com/51) 에 이어서 Frame 클래스를 인터페이스를 이용하여 추상화 시키는 작업을 진행하겠습니다.
 
+자세한 코드는 [깃 허브](https://github.com/dlwnsgus777/java-oop) 에 저장되어 있습니다.
+
 ---
 
 **Frame Interface**
