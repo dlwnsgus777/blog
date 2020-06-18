@@ -27,18 +27,49 @@ public interface Frame {
 
     void playBawling(int pinCount);
 
-    Score getScore();
+    int[] getScore();
+
+    int getTotalScore();
 }
 ```
+
+**Socore** 객체에 아래와 같이 배열로 가지고있는 점수들을 반환합니다.
+
+```java
+    public int[] getShotScore() {
+        int[] shotScore = {firstShot, secondShot, finalShot};
+        return shotScore;
+    }
+```
+
 
 **NomalFrame, FinalFrame** 객체에 아래와 같이 인터페이스에 추가한 메소드를 구현하겠습니다.
 
 ```java
     @Override
-    public Score getScore() {
-        return score;
+    public int[] getScore() {
+        return score.getShotScore();
+    }
+
+    @Override
+    public int getTotalScore() {
+        return score.getTotalScore();
     }
 ```
+
+**Score** 객체에도 실수한 부분이 있어서 수정하겠습니다.
+
+```java
+    public int getTotalScore() {
+        if (finalShot == -1) {
+            return firstShot + secondShot;
+        }
+        return firstShot + secondShot + firstShot;
+    }
+```
+위처럼 현재 점수가 마지막 프레임인지 아닌지를 판별하여 값을 돌려주겠습니다.
+
+---
 
 이제 점수 계산을 위한 객체를 생성하겠습니다.
 
