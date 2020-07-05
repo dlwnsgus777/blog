@@ -8,19 +8,139 @@
 
 ---
 
-점수 계산에 대한 책임이 있는 객체를 구현해보겠습니다.
+이제 본격적으로 점수 계산 기능을 구현하겠습니다.
 
-점수 계산은 Frame이 끝날때 이루어집니다.
+10개의 Frame이 자신의 점수를 가지고 있고, 점수에 따른 Frame의 상태
 
-만약 점수 계산을 했을 때, 스트라이크나 스페어가 나올 시에는 다음 Frame이 필요하게됩니다.
+즉, **STRIKE, SPAIRE** 인지 아니면 단순히 **평범하게 점수를 획득한 Frame**인지에 대한 값을 가지게 됩니다.
 
-먼저 점수를 계산하는 객체가 획득한 점수를 계산할 수 있도록
-
-**Frame** 객체에서 획득한 점수를 알려달라는 메시지를 수신할 수 있도록 하겠습니다.
-
-**Frame** 인터페이스를 수정하고 해당 메서드를 구현하겠습니다.
+먼저 **Score** 객체를 수정하겠습니다.
 
 ```java
+    private int firstShot;
+    private int secondShot;
+    private int finalShot;
+```
+
+기존의 Score 객체가 가지는 상태 값입니다.
+
+int 형 변수를 3개 사용하고 있습니다.
+
+이 3개의 변수는 **점수**라는 하나의 공통된 의미가 있습니다.
+
+이 3개의 변수를 배열로 만들어 하나의 변수로 만들겠습니다.
+
+그리고 추가로 **STATE** 라는 변수를 만들어 현재 FRAME이 획득한 점수가 어떤 것인지
+
+저장하겠습니다.
+
+**Score**
+
+```java
+package bowling.domain;
+
+import java.util.Arrays;
+
+public class Score {
+    private static final int FIRST_SHOT = 0;
+    private static final int SECOND_SHOT = 1;
+    private static final int FINAL_SHOT = 2;
+
+    private static final int FINAL_FRAME = 3;
+    private static final int NOMAL_FRAME = 2;
+
+    private static final int NOMAL_FRAME_FIRST_TURN = 2;
+
+    private static final int FINAL_FRAME_FIRST_TURN = 3;
+    private static final int FINAL_FRAME_SECOND_TURN = 2;
+
+    private int[] shotScores;
+    private String state;
+
+    public Score(int frameState) {
+        if (frameState == FINAL_FRAME) {
+            shotScores = new int[FINAL_FRAME];
+        }
+        shotScores = new int[NOMAL_FRAME];
+        state = "NOMAL";
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public int[] getShotScore() {
+        return shotScores;
+    }
+
+    public void setScore(int pinCount, int turn) {
+       if (shotScores.length == FINAL_FRAME) {
+           finalFrameSetScroe(pinCount, turn);
+           return;
+       }
+       nomalFrameSetScore(pinCount, turn);
+    }
+
+    public int getTotalScore() {
+        return Arrays.stream(shotScores).sum();
+    }
+
+    public boolean hasFinalTurn() {
+        return shotScores[FIRST_SHOT] + shotScores[SECOND_SHOT] >= 10;
+    }
+
+    private void finalFrameSetScroe(int pinCount, int turn) {
+        switch (turn) {
+            case FINAL_FRAME_FIRST_TURN:
+                shotScores[FIRST_SHOT] = pinCount;
+                break;
+            case FINAL_FRAME_SECOND_TURN:
+                shotScores[SECOND_SHOT] = pinCount;
+                break;
+            default:
+                shotScores[FINAL_SHOT] = pinCount;
+                break;
+        }
+    }
+
+    private void nomalFrameSetScore(int pinCount, int turn) {
+        switch (turn) {
+            case NOMAL_FRAME_FIRST_TURN:
+                shotScores[FIRST_SHOT] = pinCount;
+                break;
+            default:
+                shotScores[SECOND_SHOT] = pinCount;
+                break;
+        }
+    }
+
+    public void calculateState() {
+        if (shotScores[FIRST_SHOT] == 10) {
+           state = "STRIKE";
+            return;
+        }
+
+        if (shotScores[FIRST_SHOT] + shotScores[SECOND_SHOT] == 10) {
+            state = "SPAIRE";
+            return;
+        }
+    }
+}
+```
+
+---
+
+이제 Frame 객체를 수정하겠습니다.
+
+Frame 객체는 현재 자신이 몇번째 Frame인지에 대한 변수와
+
+Score 객체에게 메시지 요청을 하기위한 인터페이스를 추가하겠습니다.
+
+**Frame Interface**
+
+```java
+package bowling.domain;
+
 public interface Frame {
 
     boolean hasTurn();
@@ -30,55 +150,9 @@ public interface Frame {
     int[] getScore();
 
     int getTotalScore();
+
+    int getFrameNumber();
+
+    String getState();
 }
-```
-
-**Socore** 객체에 아래와 같이 배열로 가지고있는 점수들을 반환합니다.
-
-```java
-    public int[] getShotScore() {
-        int[] shotScore = {firstShot, secondShot, finalShot};
-        return shotScore;
-    }
-```
-
-
-**NomalFrame, FinalFrame** 객체에 아래와 같이 인터페이스에 추가한 메소드를 구현하겠습니다.
-
-```java
-    @Override
-    public int[] getScore() {
-        return score.getShotScore();
-    }
-
-    @Override
-    public int getTotalScore() {
-        return score.getTotalScore();
-    }
-```
-
-**Score** 객체에도 실수한 부분이 있어서 수정하겠습니다.
-
-```java
-    public int getTotalScore() {
-        if (finalShot == -1) {
-            return firstShot + secondShot;
-        }
-        return firstShot + secondShot + firstShot;
-    }
-```
-위처럼 현재 점수가 마지막 프레임인지 아닌지를 판별하여 값을 돌려주겠습니다.
-
----
-
-이제 점수 계산을 위한 객체를 생성하겠습니다.
-
-![create result](images/createresult.png)
-
-**ResultScore** 클래스를 생성합니다.
-
-**ResultScore**
-
-```java
-
 ```
